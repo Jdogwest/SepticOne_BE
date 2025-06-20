@@ -1,0 +1,9 @@
+fastapi
+sqlalchemy
+pydantic_settings
+asyncpg
+alembic
+python-jose
+bcrypt==4.0.1
+passlib[bcrypt]
+pydantic
