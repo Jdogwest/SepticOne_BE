@@ -5,4 +5,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["fastapi", "run", "app/main.py", "--proxy-headers", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0","--proxy-headers", "--port", "8000"]
