@@ -11,8 +11,10 @@ from app.requests.router import router as router_requests
 from app.workman_brigadiers.router import router as router_workman_brigadiers
 from app.request_services.router import router as router_request_services
 from app.call_requests.router import router as router_call_requests
+import logging
 
-
+logging.basicConfig(level=logging.INFO)
+print(">>> FastAPI App is loading <<<")
 app = FastAPI()
 
 app.add_middleware(
