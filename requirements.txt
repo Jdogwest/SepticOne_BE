@@ -1,4 +1,4 @@
-fastapi
+fastapi[standart]
 sqlalchemy
 pydantic_settings
 asyncpg
