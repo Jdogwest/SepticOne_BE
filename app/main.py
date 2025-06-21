@@ -39,4 +39,7 @@ app.include_router(router_request_services)
 app.include_router(router_call_requests)
 
 
+if __name__ == "__main__":
+    import uvicorn
 
+    uvicorn.run(app, host="0.0.0.0", port=8000)
