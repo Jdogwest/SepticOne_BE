@@ -1,22 +1,22 @@
 
-FROM python:3.11.9-slim
+# FROM python:3.11.9-slim
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && apt-get install -y \
+#     build-essential \
+#     libpq-dev \
+#     curl \
+#     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+# WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# COPY requirements.txt .
+# RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# COPY . .
 
-EXPOSE 8000
+# EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--proxy-headers", "--port", "8000", "--log-level", "debug"]
+# CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--proxy-headers", "--port", "8000", "--log-level", "debug"]
 
 
 
@@ -38,3 +38,13 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--proxy-headers", "--port"
 
 # # Run the FastAPI application using uvicorn server
 # CMD ["uvicorn", "fastapi:app", "--host", "0.0.0.0", "--port", "8080"]
+
+
+FROM python:3.11.9-slim
+
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+COPY . .
+
+CMD ["python", "main.py"]
