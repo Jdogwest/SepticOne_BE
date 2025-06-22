@@ -12,6 +12,7 @@ from app.workman_brigadiers.router import router as router_workman_brigadiers
 from app.request_services.router import router as router_request_services
 from app.call_requests.router import router as router_call_requests
 import logging
+import uvicorn
 from dotenv import load_dotenv
 
 
@@ -40,6 +41,4 @@ app.include_router(router_call_requests)
 
 
 if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
