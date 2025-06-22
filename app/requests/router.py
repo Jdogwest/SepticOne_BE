@@ -1,3 +1,4 @@
+from datetime import date
 from fastapi import APIRouter, Depends
 from app.requests.dao import RequestDAO
 from app.requests.schemas import SRequestCreate, SRequestEdit, SRequestFull
@@ -29,6 +30,16 @@ async def get_request_by_id(id: int, user_data: User = Depends(get_current_manag
     return await RequestDAO.find_request_by_id(id)
 
 
-@router.post("/edit/{id}", summary="Редактировать заявку")
+@router.put("/edit/{id}", summary="Редактировать заявку")
 async def edit_request(id: int, data: SRequestEdit, user_data: User = Depends(get_current_manager_user)):
     return await RequestDAO.edit_request(id, data)
+
+
+@router.get('/busy_dates/', summary="Получить список занятых дат")
+async def get_busy_dates():
+    return await RequestDAO.find_busy_dates()
+
+
+@router.get('/brigades_on_date/{date}', summary="Получить бригады на определенную дату")
+async def get_brigades_on_date(date: date, user_data: User = Depends(get_current_manager_user)):
+    return await RequestDAO.find_brigades_on_date(date)

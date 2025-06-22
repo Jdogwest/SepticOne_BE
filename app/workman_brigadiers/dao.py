@@ -15,7 +15,7 @@ class WorkmanBrigadierDAO(BaseDAO):
     async def edit_links(cls, brigades: SWorkmanBrigadierEdit):
         async with async_session_maker() as session:
             for brigad in brigades.brigads:
-                all_workman_ids = [worker_id for b in brigades.brigads for worker_id in b.workman_ids]
+                all_workman_ids = brigad.workman_ids
 
                 await session.execute(
                     delete(WorkmanBrigadier).where(
@@ -34,7 +34,10 @@ class WorkmanBrigadierDAO(BaseDAO):
 
             await session.commit()
 
-            return await WorkmanBrigadierDAO.find_brigades()
+            response = await WorkmanBrigadierDAO.find_brigades()
+            
+
+            return response
 
 
 

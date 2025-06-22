@@ -27,6 +27,6 @@ async def get_septic_full_data():
     return await SepticDAO.find_full_data()
 
 
-@router.post("/edit-septic/")
+@router.put("/edit-septic/")
 async def edit_septic(septic_data: SSepticEdit, user: User = Depends(get_current_user)):
     return await SepticDAO.edit_septic(user.id, septic_data.model_dump())
