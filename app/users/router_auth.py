@@ -23,7 +23,7 @@ async def register_user(user_data: SUserRegister) -> dict:
     return {'message': 'Вы успешно зарегистрированы!'}
 
 
-@router.post("/login")
+@router.post("/login/")
 async def auth_user(response: Response, user_data: SUserAuth):
     check = await authenticate_user(email=user_data.email, password=user_data.password)
     if check is None:
