@@ -1,3 +1,5 @@
+from datetime import date
+from app.requests.models import Request
 from sqlalchemy import delete, select
 from sqlalchemy.orm import selectinload
 from app.dao.base import BaseDAO
@@ -115,4 +117,38 @@ class WorkmanBrigadierDAO(BaseDAO):
             for worker in free_workmans:
                 worker.__dict__.pop("password", None)
             return free_workmans
+        
+        
+    @classmethod
+    async def find_busy_brigades_by_dates(cls):
+        async with async_session_maker() as session:
+            query = select(Request).where(Request.status.in_(['new', 'in_progress']))
+            requests_result = await session.execute(query)
+            requests = requests_result.scalars().all()
 
+            busy_by_date: dict[date, list[dict]] = {}
+
+            for req in requests:
+                if req.brigadier_id:
+                    user_query = select(User).where(User.id == req.brigadier_id)
+                    brigadier_result = await session.execute(user_query)
+                    brigadier = brigadier_result.scalar_one_or_none()
+                    if brigadier:
+                        busy_by_date.setdefault(req.planed_start_date, []).append({
+                            "id": brigadier.id,
+                            "name": brigadier.name,
+                            "surname": brigadier.surname,
+                            "patronymic": brigadier.patronymic,
+                            "email": brigadier.email,
+                            "phone_number": brigadier.phone_number,
+                        })
+
+            result = [
+                {
+                    "date": day.isoformat(),
+                    "busy_brigadiers": brigadiers
+                }
+                for day, brigadiers in sorted(busy_by_date.items())
+            ]
+
+            return result

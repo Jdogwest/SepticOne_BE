@@ -21,3 +21,9 @@ async def edit_brigadiers_workmans(request_body: SWorkmanBrigadierEdit, manager 
 @router.get("/free_workers/", summary="Получить всех свободных рабочих")
 async def get_free_workers():
     return await WorkmanBrigadierDAO.get_all_free_workers()
+
+
+@router.get("/busy_by_dates/", summary="Занятые дни и бригадиры")
+async def get_busy_brigadiers_by_dates(user=Depends(get_current_manager_user)):
+    return await WorkmanBrigadierDAO.find_busy_brigades_by_dates()
+
