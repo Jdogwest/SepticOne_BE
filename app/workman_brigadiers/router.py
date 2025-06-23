@@ -13,7 +13,7 @@ async def get_all_brigades():
     return await WorkmanBrigadierDAO.find_brigades()
 
 
-@router.post("/edit/", summary="Редактировать связь бригадиров с рабочими")
+@router.put("/edit/", summary="Редактировать связь бригадиров с рабочими")
 async def edit_brigadiers_workmans(request_body: SWorkmanBrigadierEdit, manager = Depends(get_current_manager_user)):
     return await WorkmanBrigadierDAO.edit_links(request_body)
 

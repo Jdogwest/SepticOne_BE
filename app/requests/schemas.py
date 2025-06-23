@@ -14,6 +14,8 @@ class SRequest(BaseModel):
     septic_id: int
     planed_start_time: time
     planed_start_date: date
+    comment: str
+    work_comment: str
 
 
 
@@ -63,10 +65,17 @@ class SRequestFull(BaseModel):
     septic_id: int
     planed_start_time: time
     planed_start_date: date
+    comment: Optional[str]
+    work_comment: Optional[str]
 
     client: SUserShort
     septic: SSepticShort
     services: List[SRequestServiceShort]
+
+
+class SRequestServiceShortEdit(BaseModel):
+    service_id: int
+    amount: int
 
 
 class SRequestEdit(BaseModel):
@@ -75,5 +84,9 @@ class SRequestEdit(BaseModel):
     planed_start_date: Optional[date] = None
     brigadier_id: Optional[int] = None
     contract_number: Optional[str] = None
+    comment: Optional[str] = None
+    work_comment: Optional[str] = None
+    services: List[SRequestServiceShortEdit] = []
+
 
 

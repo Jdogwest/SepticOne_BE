@@ -1,6 +1,6 @@
-import logging
+from datetime import date
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import delete, func, insert, select
 from sqlalchemy.orm import selectinload
 
 from app.dao.base import BaseDAO
@@ -10,8 +10,8 @@ from app.database import async_session_maker
 from app.septics.models import Septic
 from app.services.models import Service
 from app.request_services.models import RequestService
-from app.requests.rb import RBRequest
 from app.users.models import User
+from app.workman_brigadiers.models import WorkmanBrigadier
 
 
 class RequestDAO(BaseDAO):
@@ -152,7 +152,89 @@ class RequestDAO(BaseDAO):
                 raise HTTPException(status_code=404, detail="Заявка не найдена")
 
             for key, value in data:
+                if key == "services":
+                    continue
                 setattr(request, key, value)
+
+            for service in data.services:
+                await session.execute(
+                    delete(RequestService).where(
+                        RequestService.request_id == id and
+                        RequestService.service_id == service.service_id
+                    )
+                )
+
+            for service in data.services:
+                await session.execute(
+                    insert(RequestService).values(
+                        request_id=id,
+                        service_id=service.service_id,
+                        amount=service.amount
+                    )
+                )
 
             await session.commit()
             return {"message": "Заявка успешно обновлена"}
+        
+
+    @classmethod
+    async def find_busy_dates(cls):
+        async with async_session_maker() as session:
+            query = select(Request).where((Request.status == 'in_progress') | (Request.status == 'new'))
+            requests = await session.execute(query)
+            requests = requests.scalars().all()
+
+            busy_dates = set()
+            for request in requests:
+                busy_dates.add((request.planed_start_date, request.brigadier_id))
+
+            query = select(User).where(User.role == "brigadier")
+            brigadiers = await session.execute(query)
+            brigadiers = brigadiers.scalars().all()
+            busy_dates_copy = busy_dates.copy()
+            for busy_date in busy_dates_copy:
+                available_brigadiers = [brigadier.id for brigadier in brigadiers if brigadier.id != busy_date[1]]
+                if available_brigadiers:
+                    busy_dates.remove(busy_date)
+
+            result = [date[0] for date in busy_dates]
+            return list(result)
+
+
+    @classmethod
+    async def find_brigades_on_date(cls, date: date):
+        async with async_session_maker() as session:
+            query = select(Request).where((Request.status == 'in_progress') | (Request.status == 'new'))
+            requests = await session.execute(query)
+            requests = requests.scalars().all()
+            
+            busy_brigadiers = set()
+            for request in requests:
+                if request.planed_start_date == date and request.brigadier_id is not None:
+                    busy_brigadiers.add(request.brigadier_id)
+            
+            query = select(User).where((User.role == "brigadier") & (User.id.notin_(busy_brigadiers)))
+            available_brigadiers = await session.execute(query)
+            available_brigadiers = available_brigadiers.scalars().all()
+
+            available_brigadiers = [brigadier for brigadier in available_brigadiers]
+
+            for brigadier in available_brigadiers:
+                query = select(func.count("*")).select_from(WorkmanBrigadier).where(WorkmanBrigadier.brigadier_id == brigadier.id)
+                workmans_amount = await session.execute(query)
+
+                setattr(brigadier, 'workmans_count', workmans_amount.scalar_one_or_none())
+         
+            available_brigadiers = [{
+                "id": brigadier.id,
+                "name": brigadier.name,
+                "surname": brigadier.surname,
+                "patronymic": brigadier.patronymic,
+                "phone_number": brigadier.phone_number,
+                "email": brigadier.email,
+                "role": brigadier.role,
+                "workmans_count": brigadier.workmans_count,
+            } for brigadier in available_brigadiers]
+
+                
+            return available_brigadiers
