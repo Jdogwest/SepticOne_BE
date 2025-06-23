@@ -136,9 +136,52 @@ class RequestDAO(BaseDAO):
                 )
             )
             request = result.scalar_one_or_none()
+            if request is None:
+                return None
 
-            return request.to_dict() if request else None
-        
+            brigadier = await session.execute(
+                select(User).where(User.id == request.brigadier_id)
+            )
+            brigadier = brigadier.scalar_one_or_none()
+
+            workmans = await session.execute(
+                select(WorkmanBrigadier).where(WorkmanBrigadier.brigadier_id == request.brigadier_id)
+            )
+            workmans = [wb for wb in workmans]
+            workmans_count = len(workmans)
+
+            if brigadier is None:
+                return None
+
+            brigadier_dict = {
+                "id": brigadier.id,
+                "name": brigadier.name,
+                "surname": brigadier.surname,
+                "patronymic": brigadier.patronymic,
+                "phone_number": brigadier.phone_number,
+                "email": brigadier.email,
+                "role": brigadier.role,
+                "workmans_count": workmans_count,
+            }
+
+            response = {
+                "id": request.id,
+                "created_at": request.created_at,
+                "client_id": request.client_id,
+                "contract_number": request.contract_number,
+                "status": request.status,
+                "summary": request.summary,
+                "septic_id": request.septic_id,
+                "planed_start_date": request.planed_start_date,
+                "planed_start_time": request.planed_start_time,
+                "comment": request.comment,
+                "work_comment": request.work_comment,
+                "brigadier": brigadier_dict,
+                "client": request.client,  # Assuming client is a related model
+                "septic": request.septic,  # Assuming septic is a related model
+                "services": [service.service for service in request.services]  # Assuming services is a relationship
+            }
+            return response if response else None
 
     @classmethod
     async def edit_request(cls, id: int, data: SRequestEdit):

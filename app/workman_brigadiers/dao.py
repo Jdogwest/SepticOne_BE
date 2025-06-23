@@ -108,15 +108,19 @@ class WorkmanBrigadierDAO(BaseDAO):
     @classmethod
     async def get_all_free_workers(cls):
         async with async_session_maker() as session:
-            workmans_resualt = await session.execute(select(User).where(User.role == "workman"))
-            workamans = workmans_resualt.scalars().all()
-            
-            workmans_in_brigades = await session.execute(select(WorkmanBrigadier.workman_id))
+            result_all = await session.execute(select(User).where(User.role == "workman"))
+            all_workmen = result_all.scalars().all()
 
-            free_workmans = [worker for worker in workamans if worker.id not in workmans_in_brigades.scalars().all()]
-            for worker in free_workmans:
-                worker.__dict__.pop("password", None)
-            return free_workmans
+            result_busy = await session.execute(select(WorkmanBrigadier.workman_id))
+            busy_ids = set(result_busy.scalars().all())
+
+            free_workmen = [w for w in all_workmen if w.id not in busy_ids]
+
+            for w in free_workmen:
+                w.__dict__.pop("password", None)
+
+            return free_workmen
+
         
         
     @classmethod
@@ -135,6 +139,7 @@ class WorkmanBrigadierDAO(BaseDAO):
                     brigadier = brigadier_result.scalar_one_or_none()
                     if brigadier:
                         busy_by_date.setdefault(req.planed_start_date, []).append({
+                            "request_id": req.id, 
                             "id": brigadier.id,
                             "name": brigadier.name,
                             "surname": brigadier.surname,

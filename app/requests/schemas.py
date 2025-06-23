@@ -67,6 +67,7 @@ class SRequestFull(BaseModel):
     planed_start_date: date
     comment: Optional[str]
     work_comment: Optional[str]
+    brigadier_id: Optional[int] = None 
 
     client: SUserShort
     septic: SSepticShort
@@ -87,6 +88,7 @@ class SRequestEdit(BaseModel):
     comment: Optional[str] = None
     work_comment: Optional[str] = None
     services: List[SRequestServiceShortEdit] = []
+    
 
 
 
