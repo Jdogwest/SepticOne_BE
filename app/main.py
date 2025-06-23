@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
-print(">>> FastAPI App is loading <<<")
+
 app = FastAPI()
 
 app.add_middleware(
