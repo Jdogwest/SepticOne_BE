@@ -139,30 +139,30 @@ class RequestDAO(BaseDAO):
             if request is None:
                 return None
 
-            brigadier = await session.execute(
-                select(User).where(User.id == request.brigadier_id)
-            )
-            brigadier = brigadier.scalar_one_or_none()
+            brigadier_dict = None
+            if request.brigadier_id is not None:
+                brigadier_result = await session.execute(
+                    select(User).where(User.id == request.brigadier_id)
+                )
+                brigadier = brigadier_result.scalar_one_or_none()
 
-            workmans = await session.execute(
-                select(WorkmanBrigadier).where(WorkmanBrigadier.brigadier_id == request.brigadier_id)
-            )
-            workmans = [wb for wb in workmans]
-            workmans_count = len(workmans)
+                if brigadier:
+                    workmans_result = await session.execute(
+                        select(WorkmanBrigadier).where(WorkmanBrigadier.brigadier_id == request.brigadier_id)
+                    )
+                    workmans = workmans_result.scalars().all()
+                    workmans_count = len(workmans)
 
-            if brigadier is None:
-                return None
-
-            brigadier_dict = {
-                "id": brigadier.id,
-                "name": brigadier.name,
-                "surname": brigadier.surname,
-                "patronymic": brigadier.patronymic,
-                "phone_number": brigadier.phone_number,
-                "email": brigadier.email,
-                "role": brigadier.role,
-                "workmans_count": workmans_count,
-            }
+                    brigadier_dict = {
+                        "id": brigadier.id,
+                        "name": brigadier.name,
+                        "surname": brigadier.surname,
+                        "patronymic": brigadier.patronymic,
+                        "phone_number": brigadier.phone_number,
+                        "email": brigadier.email,
+                        "role": brigadier.role,
+                        "workmans_count": workmans_count,
+                    }
 
             response = {
                 "id": request.id,
@@ -177,11 +177,20 @@ class RequestDAO(BaseDAO):
                 "comment": request.comment,
                 "work_comment": request.work_comment,
                 "brigadier": brigadier_dict,
-                "client": request.client,  # Assuming client is a related model
-                "septic": request.septic,  # Assuming septic is a related model
-                "services": [service.service for service in request.services]  # Assuming services is a relationship
+                "brigadier_assigned": brigadier_dict is not None,
+                "client": request.client,
+                "septic": request.septic,
+                "services": [
+                {
+                    "id": service.service.id,
+                    "name": service.service.name,
+                    "amount": service.amount,
+                }
+                for service in request.services
+            ]
+
             }
-            return response if response else None
+            return response
 
     @classmethod
     async def edit_request(cls, id: int, data: SRequestEdit):
