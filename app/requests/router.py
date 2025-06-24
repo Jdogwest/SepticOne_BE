@@ -25,7 +25,7 @@ async def get_my_requests(user_data: User = Depends(get_current_user)):
     return await RequestDAO.find_my_requests(user_data.id)
 
 
-@router.get('/{id:int}', summary="Получить заявку по id")
+@router.get('/{id:int}/', summary="Получить заявку по id")
 async def get_request_by_id(id: int, user_data: User = Depends(get_current_manager_user)):
     return await RequestDAO.find_request_by_id(id)
 
