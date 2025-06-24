@@ -40,6 +40,6 @@ async def edit_request(id: int, data: SRequestEdit, user_data: User = Depends(ge
     return await RequestDAO.edit_request(id, data)
 
 
-@router.get('/brigades_on_date/{date}/', summary="Получить бригады на определенную дату")
+@router.get('/brigades_on_date/{date}', summary="Получить бригады на определенную дату")
 async def get_brigades_on_date(date: date, user_data: User = Depends(get_current_manager_user)):
     return await RequestDAO.find_brigades_on_date(date)
