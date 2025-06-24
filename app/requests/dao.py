@@ -235,7 +235,7 @@ class RequestDAO(BaseDAO):
     @classmethod
     async def find_busy_dates(cls):
         async with async_session_maker() as session:
-            query = select(Request).where((Request.status == 'in_progress') | (Request.status == 'new'))
+            query = select(Request).where((Request.status == 'in_work') | (Request.status == 'new'))
             requests = await session.execute(query)
             requests = requests.scalars().all()
 
@@ -259,7 +259,7 @@ class RequestDAO(BaseDAO):
     @classmethod
     async def find_brigades_on_date(cls, date: date):
         async with async_session_maker() as session:
-            query = select(Request).where((Request.status == 'in_progress') | (Request.status == 'new'))
+            query = select(Request).where((Request.status == 'in_work') | (Request.status == 'new'))
             requests = await session.execute(query)
             requests = requests.scalars().all()
             
