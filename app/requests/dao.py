@@ -12,10 +12,12 @@ from app.services.models import Service
 from app.request_services.models import RequestService
 from app.users.models import User
 from app.workman_brigadiers.models import WorkmanBrigadier
+from fastapi import HTTPException
 
 
 class RequestDAO(BaseDAO):
     model = Request
+
 
     @classmethod
     async def add_request(cls, data: SRequestCreate, user_id: int):
@@ -24,8 +26,9 @@ class RequestDAO(BaseDAO):
                 select(Septic).where(Septic.owner_id == user_id)
             )
             septic = result_septic.scalars().first()
+            
             if not septic:
-                raise ValueError("У пользователя нет привязанного септика")
+                raise HTTPException(status_code=400, detail="У пользователя нет привязанного септика")
 
             result_services = await session.execute(
                 select(Service)
@@ -41,17 +44,17 @@ class RequestDAO(BaseDAO):
                 if service_id in service_map:
                     total_summary += service_map[service_id] * amount
                 else:
-                    raise ValueError(f"Услуга с ID {service_id} не найдена в базе")
+                    raise HTTPException(status_code=400, detail=f"Услуга с ID {service_id} не найдена в базе")
 
-            
             new_request = cls.model(
-                client_id = user_id,
-                septic_id = septic.id,
-                status = 'new',
-                planed_start_time = data.planed_start_time,
-                planed_start_date = data.planed_start_date,
-                comment = data.comment,
-                summary = total_summary)
+                client_id=user_id,
+                septic_id=septic.id,
+                status='new',
+                planed_start_time=data.planed_start_time,
+                planed_start_date=data.planed_start_date,
+                comment=data.comment,
+                summary=total_summary
+            )
             
             session.add(new_request)
 
@@ -60,9 +63,9 @@ class RequestDAO(BaseDAO):
 
             for serv in data.services:
                 new_service_request_item = RequestService(
-                    request_id = new_request.id,
-                    amount = serv.amount,
-                    service_id = serv.service_id
+                    request_id=new_request.id,
+                    amount=serv.amount,
+                    service_id=serv.service_id
                 )
                 session.add(new_service_request_item)
 
@@ -78,8 +81,8 @@ class RequestDAO(BaseDAO):
             )
             created_request = created_request.scalar_one()
 
-
             return created_request.to_dict()
+
         
 
     @classmethod
