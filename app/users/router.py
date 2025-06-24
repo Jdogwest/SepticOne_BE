@@ -14,7 +14,7 @@ async def get_all_users(request_body: RBUser = Depends()) -> list[SUser]:
     return await UserDAO.find_all(**request_body.to_dict())
 
 
-@router.get("/{id}", summary="Получить одного пользователя по id")
+@router.get("/{id}/", summary="Получить одного пользователя по id")
 async def get_user_by_id(id: int, admin: User = Depends(get_current_manager_user)):
     rez = await UserDAO.getClient(id)
     if rez is None:
