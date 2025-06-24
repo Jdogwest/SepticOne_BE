@@ -45,6 +45,6 @@ async def edit_user(user_data: SUserEdit, user: User = Depends(get_current_user)
 async def edit_user(user_id: int, user_data: SUserEditFull, user: User = Depends(get_current_manager_user)):
     return await UserDAO.edit_user_full(user_id, user_data.model_dump())
 
-@router.put("/edit-user-and-role/{user_id:int}/", summary="Редактировать пользователя и роль. Только для админа")
+@router.put("/edit-user-and-role/{user_id:int}", summary="Редактировать пользователя и роль. Только для админа")
 async def edit_user_and_roll(user_id: int, user_data: SUserEditFullAndRole, user: User = Depends(get_current_admin_user)):
     return await UserDAO.edit_user_full_and_role(user_id, user_data.model_dump())
