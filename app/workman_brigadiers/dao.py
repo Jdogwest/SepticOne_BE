@@ -126,7 +126,7 @@ class WorkmanBrigadierDAO(BaseDAO):
     @classmethod
     async def find_busy_brigades_by_dates(cls):
         async with async_session_maker() as session:
-            query = select(Request).where(Request.status.in_(['new', 'in_progress']))
+            query = select(Request).where(Request.status.in_(['new', 'in_work']))
             requests_result = await session.execute(query)
             requests = requests_result.scalars().all()
 
