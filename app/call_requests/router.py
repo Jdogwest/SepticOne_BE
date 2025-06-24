@@ -20,6 +20,6 @@ async def add_call_request(request_data: SCallRequestCreate):
     return await CallRequestDAO.add_call_request(request_data.model_dump())
 
 
-@router.put("/edit-call-request/{request_id}/")
+@router.put("/edit-call-request/{request_id:int}")
 async def edit_call_request(request_id: int, request_data: SCallRequestUpdate, manager: User = Depends(get_current_manager_user)):
     return await CallRequestDAO.edit_call_request(request_id, request_data.model_dump())
