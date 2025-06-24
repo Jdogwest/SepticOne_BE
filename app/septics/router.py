@@ -14,7 +14,7 @@ async def get_all_septics(request_body: RBSeptic = Depends()) -> list[SSeptic]:
     return await SepticDAO.find_all(**request_body.to_dict())
 
 
-@router.get("/{id}", summary="Получить одного сотрудника по должности")
+@router.get("/{id}/", summary="Получить одного сотрудника по должности")
 async def get_septic_by_id(septic_position: str) -> SSeptic | None:
     rez = await SepticDAO.find_one_or_none_by_id(septic_position)
     if rez is None:
@@ -22,7 +22,7 @@ async def get_septic_by_id(septic_position: str) -> SSeptic | None:
     return rez
 
 
-@router.get("/full_data/{id}")
+@router.get("/full_data/{id}/")
 async def get_septic_full_data():
     return await SepticDAO.find_full_data()
 
